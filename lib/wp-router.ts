@@ -1,5 +1,5 @@
 import camelCase from 'camelcase';
-import { ClassList, RouteList } from './interfaces';
+import type { ClassList, RouteList } from './interfaces';
 
 /**
  * DOM-based Routing
@@ -82,6 +82,13 @@ export class WpRouter {
       .toLowerCase()
       .split(/\s+/)
       .map((bodyClass) => camelCase(bodyClass))
+      .reduce((acc, cn) => {
+        if (cn && !acc.includes(cn)) {
+          acc.push(cn);
+        }
+
+        return acc;
+      }, [] as string[])
       .forEach((className) => {
         this.fire(className, 'init', this.propagate);
         this.fire(className, 'finalize', this.propagate);
