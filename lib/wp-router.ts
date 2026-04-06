@@ -78,18 +78,13 @@ export class WpRouter {
     this.fire('common', 'init', this.propagate);
 
     // Fire page-specific init JS, and then finalize JS
-    document.body.className
-      .toLowerCase()
-      .split(/\s+/)
-      .map((bodyClass) => camelCase(bodyClass))
-      .reduce((acc, cn) => {
-        if (cn && !acc.includes(cn)) {
-          acc.push(cn);
-        }
-
-        return acc;
-      }, [] as string[])
-      .forEach((className) => {
+    [...new Set(
+      document.body.className
+        .toLowerCase()
+        .split(/\s+/)
+        .filter(Boolean)
+        .map((bodyClass) => camelCase(bodyClass)),
+    )].forEach((className) => {
         this.fire(className, 'init', this.propagate);
         this.fire(className, 'finalize', this.propagate);
       });
