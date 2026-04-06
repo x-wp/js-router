@@ -20,9 +20,9 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/wptoolkit/router.git"
+    "url": "https://github.com/x-wp/js-router.git"
   },
-  "bugs": "https://github.com/wptoolkit/router/issues",
+  "bugs": "https://github.com/x-wp/js-router/issues",
   "keywords": [
     "wp-router",
     "WP router",
