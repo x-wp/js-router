@@ -1,6 +1,6 @@
 {
-  "name": "@wptoolset/router",
-  "version": "1.0.3",
+  "name": "@x-wp/router",
+  "version": "0.0.0",
   "license": "GPL-3.0",
   "private": false,
   "publishConfig": {
