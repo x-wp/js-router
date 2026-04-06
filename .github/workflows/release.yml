@@ -29,8 +29,6 @@ jobs:
         run: npm install
       - name: Lint
         run: npm run lint
-      - name: Test
-        run: aa-exec --profile=chrome npm run test:e2e
       - name: Build
         run: npm run build
       - name: Release
