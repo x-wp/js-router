@@ -1,0 +1,7 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "embedded",
+  "dolt_database": "router",
+  "project_id": "63631517-4d17-4f95-9dc5-67a585e2300f"
+}
