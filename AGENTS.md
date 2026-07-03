@@ -1,84 +1,31 @@
-# Agent Instructions
+# Repository Guidelines
 
-This project uses **bd** (beads) for issue tracking. Run `bd prime` for full workflow context.
+## Project Structure & Module Organization
 
-## Quick Reference
+This package is a small TypeScript library for DOM-based WordPress routing. Source lives in `lib/`, with the public entry point in `lib/index.ts`, router behavior in `lib/wp-router.ts`, and shared types in `lib/interfaces/`. Build output goes to `dist/` and should not be edited by hand. Release automation is in `build/release.sh`; package metadata and scripts are in `package.json`.
 
-```bash
-bd ready              # Find available work
-bd show <id>          # View issue details
-bd update <id> --claim  # Claim work atomically
-bd close <id>         # Complete work
-bd dolt push          # Push beads data to remote
-```
+## Build, Test, and Development Commands
 
-## Non-Interactive Shell Commands
+- `npm run build` removes `dist/` and compiles TypeScript with declarations and source maps.
+- `npm run build:production` compiles with `tsconfig.production.json` and disables source maps.
+- `npm run watch` runs TypeScript in watch mode after clearing `dist/`.
+- `npm run lint` runs ESLint over `lib/*.ts`.
+- `npm run release:test` performs a semantic-release dry run.
 
-**ALWAYS use non-interactive flags** with file operations to avoid hanging on confirmation prompts.
+The planned Rollup migration should preserve declarations and add explicit multi-target outputs, for example CommonJS and ESM bundles from the same `lib/index.ts` entry.
 
-Shell commands like `cp`, `mv`, and `rm` may be aliased to include `-i` (interactive) mode on some systems, causing the agent to hang indefinitely waiting for y/n input.
+## Coding Style & Naming Conventions
 
-**Use these forms instead:**
-```bash
-# Force overwrite without prompting
-cp -f source dest           # NOT: cp source dest
-mv -f source dest           # NOT: mv source dest
-rm -f file                  # NOT: rm file
+Use TypeScript with strict mode enabled. Formatting is controlled by Prettier: single quotes, trailing commas, and `printWidth: 150`. ESLint uses `@typescript-eslint` plus Prettier integration. Keep exported interfaces in `lib/interfaces/`, name interface files with the existing `*.interface.ts` pattern, and prefer named exports through `lib/index.ts`.
 
-# For recursive operations
-rm -rf directory            # NOT: rm -r directory
-cp -rf source dest          # NOT: cp -r source dest
-```
+## Testing Guidelines
 
-**Other commands that may prompt:**
-- `scp` - use `-o BatchMode=yes` for non-interactive
-- `ssh` - use `-o BatchMode=yes` to fail instead of prompting
-- `apt-get` - use `-y` flag
-- `brew` - use `HOMEBREW_NO_AUTO_UPDATE=1` env var
+There is no active test suite in the current package. For behavior changes, add focused tests first and wire them into `npm test` or an equivalent script. Until then, verify changes with `npm run lint` and the relevant build commands. For Rollup work, inspect generated artifacts to confirm each target resolves and includes type declarations.
 
-<!-- BEGIN BEADS INTEGRATION v:1 profile:minimal hash:ca08a54f -->
-## Beads Issue Tracker
+## Commit & Pull Request Guidelines
 
-This project uses **bd (beads)** for issue tracking. Run `bd prime` to see full workflow context and commands.
+Recent history follows Conventional Commits such as `fix: Dependency tuneup` and `chore(ci): Update GitHub Actions versions and runner`. Use concise subjects with an appropriate type (`fix`, `chore`, `feat`, etc.). Pull requests should describe the change, link the beads issue, list verification commands, and note any packaging or release impact.
 
-### Quick Reference
+## Agent-Specific Instructions
 
-```bash
-bd ready              # Find available work
-bd show <id>          # View issue details
-bd update <id> --claim  # Claim work
-bd close <id>         # Complete work
-```
-
-### Rules
-
-- Use `bd` for ALL task tracking — do NOT use TodoWrite, TaskCreate, or markdown TODO lists
-- Run `bd prime` for detailed command reference and session close protocol
-- Use `bd remember` for persistent knowledge — do NOT use MEMORY.md files
-
-## Session Completion
-
-**When ending a work session**, you MUST complete ALL steps below. Work is NOT complete until `git push` succeeds.
-
-**MANDATORY WORKFLOW:**
-
-1. **File issues for remaining work** - Create issues for anything that needs follow-up
-2. **Run quality gates** (if code changed) - Tests, linters, builds
-3. **Update issue status** - Close finished work, update in-progress items
-4. **PUSH TO REMOTE** - This is MANDATORY:
-   ```bash
-   git pull --rebase
-   bd dolt push
-   git push
-   git status  # MUST show "up to date with origin"
-   ```
-5. **Clean up** - Clear stashes, prune remote branches
-6. **Verify** - All changes committed AND pushed
-7. **Hand off** - Provide context for next session
-
-**CRITICAL RULES:**
-- Work is NOT complete until `git push` succeeds
-- NEVER stop before pushing - that leaves work stranded locally
-- NEVER say "ready to push when you are" - YOU must push
-- If push fails, resolve and retry until it succeeds
-<!-- END BEADS INTEGRATION -->
+This repository uses `bd` (beads) for issue tracking. Run `bd prime` for workflow context, create or claim an issue before code changes, and close it when finished. Use `bd remember` for durable project knowledge; do not add memory files. Avoid interactive shell prompts: use `cp -f`, `mv -f`, `rm -f`, `rm -rf`, `ssh -o BatchMode=yes`, and similar non-interactive flags. Before ending a work session with changes, run quality gates, commit, `git pull --rebase`, `bd dolt push`, `git push`, and confirm `git status` is clean and up to date.
