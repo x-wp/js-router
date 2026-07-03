@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig",
+  "compilerOptions": {
+    "declaration": false,
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "outDir": "./.rollup",
+    "sourceMap": false,
+    "types": []
+  }
+}

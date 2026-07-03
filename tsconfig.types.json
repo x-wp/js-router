@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig",
+  "compilerOptions": {
+    "emitDeclarationOnly": true,
+    "moduleResolution": "node",
+    "outDir": "./dist",
+    "sourceMap": false,
+    "types": []
+  }
+}

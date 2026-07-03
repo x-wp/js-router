@@ -15,16 +15,14 @@ export class WpRouter {
    * @type {ClassList}
    * @memberof WpRouter
    */
-  private classes: ClassList;
+  private classes: ClassList = {};
 
   /**
    * Create a new Router
    * @param routes    A RouteList object
    * @param propagate Should we trigger a global dispatch event
    */
-  constructor(private readonly routes: RouteList, private readonly propagate = false) {
-    this.classes = {};
-  }
+  constructor(private readonly routes: RouteList, private readonly propagate = false) {}
 
   /**
    * Fire Router events
@@ -78,7 +76,17 @@ export class WpRouter {
     this.fire('common', 'init', this.propagate);
 
     // Fire page-specific init JS, and then finalize JS
-    [
+    this.getBodyRouteNames().forEach((className) => {
+      this.fire(className, 'init', this.propagate);
+      this.fire(className, 'finalize', this.propagate);
+    });
+
+    // Fire common finalize JS
+    this.fire('common', 'finalize', this.propagate);
+  }
+
+  private getBodyRouteNames(): string[] {
+    return [
       ...new Set(
         document.body.className
           .toLowerCase()
@@ -86,12 +94,6 @@ export class WpRouter {
           .filter(Boolean)
           .map((bodyClass) => camelCase(bodyClass)),
       ),
-    ].forEach((className) => {
-      this.fire(className, 'init', this.propagate);
-      this.fire(className, 'finalize', this.propagate);
-    });
-
-    // Fire common finalize JS
-    this.fire('common', 'finalize', this.propagate);
+    ];
   }
 }
