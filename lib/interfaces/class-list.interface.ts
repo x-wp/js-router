@@ -1,5 +1,5 @@
-import { RouteInterface } from '.';
+import type { RouteRegistrationInterface } from './route-registration.interface';
 
 export interface ClassList {
-  [key: string]: RouteInterface;
+  [key: string]: RouteRegistrationInterface[];
 }

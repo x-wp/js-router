@@ -30,6 +30,40 @@ describe('WpRouter', () => {
     expect(calls).toEqual(['home:init', 'home:finalize']);
   });
 
+  it('registers multiple handlers for the same route and fires each once', () => {
+    const calls: string[] = [];
+    const router = new WpRouter({
+      home: () => createRoute(calls, 'homeOne'),
+    });
+
+    router.register({
+      home: () => createRoute(calls, 'homeTwo'),
+    });
+
+    document.body.className = 'home';
+    router.loadEvents();
+    router.loadEvents();
+
+    expect(calls).toEqual(['homeOne:init', 'homeTwo:init', 'homeOne:finalize', 'homeTwo:finalize']);
+  });
+
+  it('fires only newly registered handlers when loadEvents is called again', () => {
+    const calls: string[] = [];
+    const router = new WpRouter({
+      home: () => createRoute(calls, 'homeOne'),
+    });
+
+    document.body.className = 'home';
+    router.loadEvents();
+
+    router.register({
+      home: () => createRoute(calls, 'homeTwo'),
+    });
+    router.loadEvents();
+
+    expect(calls).toEqual(['homeOne:init', 'homeOne:finalize', 'homeTwo:init', 'homeTwo:finalize']);
+  });
+
   it('returns false when a route does not exist', () => {
     const router = new WpRouter({});
 
@@ -86,12 +120,36 @@ describe('WpRouter', () => {
     document.body.className = 'home blog-post home missing-route';
     router.loadEvents();
 
+    expect(calls).toEqual(['common:init', 'home:init', 'home:finalize', 'blogPost:init', 'blogPost:finalize', 'common:finalize']);
+  });
+
+  it('normalizes WordPress body classes into route names', () => {
+    const calls: string[] = [];
+    const routes: RouteList = {
+      common: () => createRoute(calls, 'common'),
+      blogPost: () => createRoute(calls, 'blogPost'),
+      pageId2: () => createRoute(calls, 'pageId2'),
+      postTypeArchiveProduct: () => createRoute(calls, 'postTypeArchiveProduct'),
+      fooBar: () => createRoute(calls, 'fooBar'),
+      foo1Bar: () => createRoute(calls, 'foo1Bar'),
+    };
+    const router = new WpRouter(routes);
+
+    document.body.className = 'blog-post page-id-2 post-type-archive-product foo--bar foo1bar';
+    router.loadEvents();
+
     expect(calls).toEqual([
       'common:init',
-      'home:init',
-      'home:finalize',
       'blogPost:init',
       'blogPost:finalize',
+      'pageId2:init',
+      'pageId2:finalize',
+      'postTypeArchiveProduct:init',
+      'postTypeArchiveProduct:finalize',
+      'fooBar:init',
+      'fooBar:finalize',
+      'foo1Bar:init',
+      'foo1Bar:finalize',
       'common:finalize',
     ]);
   });
