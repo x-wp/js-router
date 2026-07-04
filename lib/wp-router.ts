@@ -53,8 +53,31 @@ export class WpRouter {
    * @param routes    A RouteList object
    * @param propagate Should we trigger a global dispatch event
    */
-  constructor(private readonly routes: RouteList, private readonly propagate = false) {
+  constructor(routes: RouteList, private readonly propagate = false) {
     this.classes = {};
+    this.register(routes);
+  }
+
+  /**
+   * Register route handlers.
+   * @param routes DOM-based route handlers keyed by normalized body class
+   */
+  public register(routes: RouteList): WpRouter {
+    Object.keys(routes).forEach((route) => {
+      if (!this.classes[route]) {
+        this.classes[route] = [];
+      }
+
+      this.classes[route].push({
+        create: routes[route],
+        fired: {
+          init: false,
+          finalize: false,
+        },
+      });
+    });
+
+    return this;
   }
 
   /**
@@ -64,6 +87,17 @@ export class WpRouter {
    * @param propagate Should we trigger a global dispatch event
    */
   public fire(route: string, event: 'init' | 'finalize', propagate: boolean): boolean {
+    // Route not found - bail out
+    if (!this.classes[route]) {
+      return false;
+    }
+
+    const registrations = this.classes[route].filter((registration) => !registration.fired[event]);
+
+    if (registrations.length === 0) {
+      return true;
+    }
+
     if (propagate) {
       document.dispatchEvent(
         new CustomEvent('wpRouted', {
@@ -76,21 +110,20 @@ export class WpRouter {
       );
     }
 
-    // Route not found - bail out
-    if (!this.routes[route]) {
-      return false;
-    }
+    registrations.forEach((registration) => {
+      // Class not initialized - load it
+      if (!registration.instance) {
+        registration.instance = registration.create();
+      }
 
-    // Class not initialized - load it
-    if (!this.classes[route]) {
-      this.classes[route] = this.routes[route]();
-    }
+      try {
+        registration.instance[event]();
+      } catch (e) {
+        console.error(e);
+      }
 
-    try {
-      this.classes[route][event]();
-    } catch (e) {
-      console.error(e);
-    }
+      registration.fired[event] = true;
+    });
 
     return true;
   }
@@ -104,17 +137,17 @@ export class WpRouter {
    *  * page-specific finalize
    *  * common finalize
    */
-  public loadEvents(): void {
+  public loadEvents(propagate = this.propagate): void {
     // Fire common init JS
-    this.fire('common', 'init', this.propagate);
+    this.fire('common', 'init', propagate);
 
     // Fire page-specific init JS, and then finalize JS
     [...new Set(document.body.className.toLowerCase().split(/\s+/).filter(Boolean).map(normalizeBodyClass))].forEach((className) => {
-      this.fire(className, 'init', this.propagate);
-      this.fire(className, 'finalize', this.propagate);
+      this.fire(className, 'init', propagate);
+      this.fire(className, 'finalize', propagate);
     });
 
     // Fire common finalize JS
-    this.fire('common', 'finalize', this.propagate);
+    this.fire('common', 'finalize', propagate);
   }
 }

@@ -30,6 +30,40 @@ describe('WpRouter', () => {
     expect(calls).toEqual(['home:init', 'home:finalize']);
   });
 
+  it('registers multiple handlers for the same route and fires each once', () => {
+    const calls: string[] = [];
+    const router = new WpRouter({
+      home: () => createRoute(calls, 'homeOne'),
+    });
+
+    router.register({
+      home: () => createRoute(calls, 'homeTwo'),
+    });
+
+    document.body.className = 'home';
+    router.loadEvents();
+    router.loadEvents();
+
+    expect(calls).toEqual(['homeOne:init', 'homeTwo:init', 'homeOne:finalize', 'homeTwo:finalize']);
+  });
+
+  it('fires only newly registered handlers when loadEvents is called again', () => {
+    const calls: string[] = [];
+    const router = new WpRouter({
+      home: () => createRoute(calls, 'homeOne'),
+    });
+
+    document.body.className = 'home';
+    router.loadEvents();
+
+    router.register({
+      home: () => createRoute(calls, 'homeTwo'),
+    });
+    router.loadEvents();
+
+    expect(calls).toEqual(['homeOne:init', 'homeOne:finalize', 'homeTwo:init', 'homeTwo:finalize']);
+  });
+
   it('returns false when a route does not exist', () => {
     const router = new WpRouter({});
 
