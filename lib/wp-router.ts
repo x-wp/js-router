@@ -1,5 +1,36 @@
-import camelCase from 'camelcase';
 import type { ClassList, RouteList } from './interfaces';
+
+const capitalize = (value: string): string => value.charAt(0).toUpperCase() + value.slice(1);
+
+const splitNumericJoins = (value: string): string[] => {
+  const words: string[] = [];
+  let word = '';
+
+  Array.from(value).forEach((character, index) => {
+    if (index > 0 && /\d/.test(value.charAt(index - 1)) && /[a-z]/.test(character)) {
+      words.push(word);
+      word = '';
+    }
+
+    word += character;
+  });
+
+  if (word) {
+    words.push(word);
+  }
+
+  return words;
+};
+
+const normalizeBodyClass = (bodyClass: string): string => {
+  const [firstWord = '', ...words] = bodyClass
+    .toLowerCase()
+    .split(/[-_.]+/g)
+    .filter(Boolean)
+    .reduce<string[]>((result, word) => result.concat(splitNumericJoins(word)), []);
+
+  return `${firstWord}${words.map(capitalize).join('')}`;
+};
 
 /**
  * DOM-based Routing
@@ -78,15 +109,7 @@ export class WpRouter {
     this.fire('common', 'init', this.propagate);
 
     // Fire page-specific init JS, and then finalize JS
-    [
-      ...new Set(
-        document.body.className
-          .toLowerCase()
-          .split(/\s+/)
-          .filter(Boolean)
-          .map((bodyClass) => camelCase(bodyClass)),
-      ),
-    ].forEach((className) => {
+    [...new Set(document.body.className.toLowerCase().split(/\s+/).filter(Boolean).map(normalizeBodyClass))].forEach((className) => {
       this.fire(className, 'init', this.propagate);
       this.fire(className, 'finalize', this.propagate);
     });

@@ -86,12 +86,36 @@ describe('WpRouter', () => {
     document.body.className = 'home blog-post home missing-route';
     router.loadEvents();
 
+    expect(calls).toEqual(['common:init', 'home:init', 'home:finalize', 'blogPost:init', 'blogPost:finalize', 'common:finalize']);
+  });
+
+  it('normalizes WordPress body classes into route names', () => {
+    const calls: string[] = [];
+    const routes: RouteList = {
+      common: () => createRoute(calls, 'common'),
+      blogPost: () => createRoute(calls, 'blogPost'),
+      pageId2: () => createRoute(calls, 'pageId2'),
+      postTypeArchiveProduct: () => createRoute(calls, 'postTypeArchiveProduct'),
+      fooBar: () => createRoute(calls, 'fooBar'),
+      foo1Bar: () => createRoute(calls, 'foo1Bar'),
+    };
+    const router = new WpRouter(routes);
+
+    document.body.className = 'blog-post page-id-2 post-type-archive-product foo--bar foo1bar';
+    router.loadEvents();
+
     expect(calls).toEqual([
       'common:init',
-      'home:init',
-      'home:finalize',
       'blogPost:init',
       'blogPost:finalize',
+      'pageId2:init',
+      'pageId2:finalize',
+      'postTypeArchiveProduct:init',
+      'postTypeArchiveProduct:finalize',
+      'fooBar:init',
+      'fooBar:finalize',
+      'foo1Bar:init',
+      'foo1Bar:finalize',
       'common:finalize',
     ]);
   });
