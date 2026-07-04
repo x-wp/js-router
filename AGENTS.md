@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-This package is a small TypeScript library for DOM-based WordPress routing. Source lives in `lib/`, with the public entry point in `lib/index.ts`, router behavior in `lib/wp-router.ts`, and shared types in `lib/interfaces/`. Build output goes to `dist/` and should not be edited by hand. Release automation is in `build/release.sh`; package metadata and scripts are in `package.json`.
+This package is a small TypeScript library for DOM-based WordPress routing. Source lives in `lib/`, with the public entry point in `lib/index.ts`, router behavior in `lib/wp-router.ts`, and shared types in `lib/interfaces/`. Build output goes to `dist/` and should not be edited by hand. Release automation is handled by `.github/workflows/release.yml` and `.releaserc`; package metadata and scripts are in `package.json`.
 
 ## Build, Test, and Development Commands
 
@@ -10,7 +10,7 @@ This package is a small TypeScript library for DOM-based WordPress routing. Sour
 - `npm run build:production` compiles with `tsconfig.production.json` and disables source maps.
 - `npm run watch` runs TypeScript in watch mode after clearing `dist/`.
 - `npm run lint` runs ESLint over `lib/*.ts`.
-- `npm run release:test` performs a semantic-release dry run.
+- `npm test` runs the Jest test suite.
 
 The planned Rollup migration should preserve declarations and add explicit multi-target outputs, for example CommonJS and ESM bundles from the same `lib/index.ts` entry.
 
@@ -20,7 +20,7 @@ Use TypeScript with strict mode enabled. Formatting is controlled by Prettier: s
 
 ## Testing Guidelines
 
-There is no active test suite in the current package. For behavior changes, add focused tests first and wire them into `npm test` or an equivalent script. Until then, verify changes with `npm run lint` and the relevant build commands. For Rollup work, inspect generated artifacts to confirm each target resolves and includes type declarations.
+For behavior changes, add focused Jest tests first and wire them into `npm test` if needed. Verify changes with `npm run lint`, `npm test`, and the relevant build commands. For Rollup work, inspect generated artifacts to confirm each target resolves and includes type declarations.
 
 ## Commit & Pull Request Guidelines
 
